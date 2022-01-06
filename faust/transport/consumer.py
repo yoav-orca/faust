@@ -72,6 +72,7 @@ from typing import (
 from weakref import WeakSet
 
 from aiokafka.errors import ProducerFenced
+import intervaltree
 from mode import Service, ServiceT, flight_recorder, get_logger
 from mode.threads import MethodQueue, QueueServiceThread
 from mode.utils.futures import notify
