@@ -46,6 +46,7 @@ The Consumer is responsible for:
 import abc
 import asyncio
 import gc
+import itertools
 import typing
 from asyncio import Event
 from collections import defaultdict
