@@ -1073,7 +1073,7 @@ class Consumer(Service, ConsumerT):
                 if overlap_range is not None:
                     new_max_offset = max(overlap_range.begin, max_offset+1)
                     # list of ranges in current overlap
-                    acked.extend(itertools.chain(range(interval.being, interval.end) for interval in gap_for_tp.overlap(0, new_max_offset)))
+                    acked.extend(itertools.chain(range(interval.begin, interval.end) for interval in gap_for_tp.overlap(0, new_max_offset)))
                     # remove previous entries from gap
                     gap_for_tp.chop(0, new_max_offset)
             acked.sort()
