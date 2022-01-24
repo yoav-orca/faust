@@ -46,10 +46,10 @@ The Consumer is responsible for:
 import abc
 import asyncio
 import gc
-import itertools
 import typing
 from asyncio import Event
 from collections import defaultdict
+from itertools import chain
 from time import monotonic
 from typing import (
     Any,
@@ -72,8 +72,8 @@ from typing import (
 )
 from weakref import WeakSet
 
-from aiokafka.errors import ProducerFenced
 import intervaltree
+from aiokafka.errors import ProducerFenced
 from mode import Service, ServiceT, flight_recorder, get_logger
 from mode.threads import MethodQueue, QueueServiceThread
 from mode.utils.futures import notify
@@ -104,7 +104,6 @@ else:
 
     class _App:
         ...  # noqa: E701
-
 
 __all__ = ["Consumer", "Fetcher"]
 
@@ -1067,13 +1066,14 @@ class Consumer(Service, ConsumerT):
             gap_for_tp: intervaltree.IntervalTree = self._gap[tp]
             if gap_for_tp:
                 # returns set of overlapping ranges
-                overlaps = gap_for_tp.overlap(max_offset+1, 2**64+1)
+                overlaps = gap_for_tp.overlap(max_offset + 1, 2 ** 64 + 1)
                 overlap_range = next(iter(overlaps), None)
                 # if we have an overlap
                 if overlap_range is not None:
-                    new_max_offset = max(overlap_range.begin, max_offset+1)
+                    new_max_offset = max(overlap_range.begin, max_offset + 1)
                     # list of ranges in current overlap
-                    acked.extend(itertools.chain(range(interval.begin, interval.end) for interval in gap_for_tp.overlap(0, new_max_offset)))
+                    acked.extend(chain.from_iterable(range(interval.begin, interval.end + 1)
+                                                     for interval in gap_for_tp.overlap(0, new_max_offset)))
                     # remove previous entries from gap
                     gap_for_tp.chop(0, new_max_offset)
             acked.sort()
@@ -1314,7 +1314,6 @@ class ConsumerThread(QueueServiceThread):
 
 
 class ThreadDelegateConsumer(Consumer):
-
     _thread: ConsumerThread
 
     #: Main thread method queue.
